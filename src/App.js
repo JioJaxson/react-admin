@@ -1,8 +1,7 @@
 import React from 'react';
 import {HashRouter,Switch,Route, } from 'react-router-dom';
 // 引用组件
-import Home from './views/Home'
-import About from './views/About'
+import Login from './views/login/index'
 
 // 无状态组件
 class App extends React.Component { 
@@ -11,21 +10,12 @@ class App extends React.Component {
     this.state = {}
   }
   render() {
-    return (
-      <div className='body'>
-          <h1>dnvkdf</h1>
-          <ul>
-            <li>的内存数据</li>
-            <li>的内存数据</li>
-            <li>的内存数据</li>
-          </ul>
+    return (        
       <HashRouter>
         <Switch>
-        <Route component={ Home} exact path='/' />
-        <Route component={About} path='/about' />
+        <Route exact component={Login} path='/' />
       </Switch>
-        </HashRouter>
-        </div>
+      </HashRouter>
         
 )
   }
