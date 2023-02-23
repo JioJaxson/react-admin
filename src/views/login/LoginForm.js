@@ -7,7 +7,7 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 // antd
-import { Button, Checkbox, Form, Input, Row, Col, message } from "antd";
+import { Button, Checkbox, Form, Input, Row, Col } from "antd";
 // scss
 import "./index.scss";
 // svg
@@ -18,7 +18,9 @@ import qq_icon from "../../static/imgs/qq_icon.svg";
 // validate
 import { validate_password } from "../../utils/validate";
 // API
-import { LoginAPI, GetCodeAPI } from "../../api/account";
+import { LoginAPI } from "../../api/account";
+// 组件
+import GetCode from "../../components/getCode/index";
 
 class LoginForm extends Component {
   constructor() {
@@ -41,32 +43,6 @@ class LoginForm extends Component {
       });
     console.log("Received values of form: ", values);
   };
-  // 获取验证码
-  getCodeFn = () => {
-    if (!this.state.username) {
-      message.warning("用户名不能为空!", 1);
-      return false;
-    }
-    const requestData = {
-      username: this.state.username,
-      module: "login",
-    };
-    this.setState({
-      code_button_loading: true,
-      code_button_text: "发送中",
-    });
-    GetCodeAPI(requestData)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        this.setState({
-          code_button_loading: false,
-          code_button_text: "重新获取",
-        });
-      });
-    console.log(88888);
-  };
 
   /** input输入处理 */
   inputChange = (e) => {
@@ -76,18 +52,14 @@ class LoginForm extends Component {
       username: value,
     });
   };
+
   toggleForm = () => {
     // 调父级的方法
     this.props.switchForm("register");
   };
 
   render() {
-    const {
-      username,
-      code_button_loading,
-      code_button_disabled,
-      code_button_text,
-    } = this.state;
+    const { username } = this.state;
 
     return (
       <div className="body">
@@ -172,16 +144,7 @@ class LoginForm extends Component {
                   />
                 </Col>
                 <Col span={9}>
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={this.getCodeFn}
-                    disabled={code_button_disabled}
-                    loading={code_button_loading}
-                  >
-                    {code_button_text}
-                  </Button>
+                  <GetCode username={username} />
                 </Col>
               </Row>
             </Form.Item>
@@ -213,11 +176,6 @@ class LoginForm extends Component {
               <img src={weixin_icon} alt=""></img>
               <img src={github_icon} alt=""></img>
               <img src={bilibili_icon} alt=""></img>
-
-              {/* <img
-                src={require("../../static/imgs/weixin_qs.jpg")}
-                alt=""
-              ></img> */}
             </div>
           </div>
         </div>

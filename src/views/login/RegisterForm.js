@@ -16,20 +16,34 @@ import weixin_icon from "../../static/imgs/weixin_icon.svg";
 import bilibili_icon from "../../static/imgs/bilibili_icon.svg";
 import qq_icon from "../../static/imgs/qq_icon.svg";
 // 组件
+import GetCode from "../../components/getCode/index";
 
-class RigisterForm extends Component {
+class RegisterForm extends Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      username: "",
+    };
   }
   onFinish = (values) => {
     console.log("Received values of form: ", values);
   };
+  /** input输入处理 */
+  inputChange = (e) => {
+    let value = e.target.value;
+    console.log(value);
+    this.setState({
+      username: value,
+    });
+  };
+
   toggleForm = () => {
     // 调父级的方法
     this.props.switchForm("login");
   };
+
   render() {
+    const { username } = this.state;
     return (
       <div className="body">
         <div className="form_wrap c_white">
@@ -51,7 +65,7 @@ class RigisterForm extends Component {
             initialValues={{
               remember: true,
             }}
-            onFinish={() => this.onFinish}
+            onFinish={this.onFinish}
           >
             <Form.Item
               name="username"
@@ -60,10 +74,15 @@ class RigisterForm extends Component {
                   required: true,
                   message: "请输入用户名!",
                 },
+                {
+                  type: "email",
+                  message: "邮箱格式不正确!",
+                },
               ]}
             >
               <Input
                 prefix={<UserOutlined />}
+                onChange={this.inputChange}
                 placeholder="用户邮箱"
                 size="large"
               />
@@ -85,7 +104,7 @@ class RigisterForm extends Component {
               />
             </Form.Item>
             <Form.Item
-              name="password"
+              name="rePassword"
               rules={[
                 {
                   required: true,
@@ -113,13 +132,11 @@ class RigisterForm extends Component {
                   />
                 </Col>
                 <Col span={9}>
-                  <Button type="primary" size="large" block>
-                    获取验证码
-                  </Button>
+                  <GetCode username={username} />
                 </Col>
               </Row>
             </Form.Item>
-            <Form.Item className="fja_sb_c" block>
+            <Form.Item className="fja_sb_c">
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox className="c_white">记住密码</Checkbox>
               </Form.Item>
@@ -155,4 +172,4 @@ class RigisterForm extends Component {
   }
 }
 
-export default RigisterForm;
+export default RegisterForm;
