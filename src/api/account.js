@@ -13,3 +13,14 @@ export function LoginAPI(data) {
     data,
   });
 }
+
+/**
+ * 验证码接口
+ */
+ export function GetCodeAPI(data) {
+  return service.request({
+    url: "/getSms/",
+    method: "POST",
+    data,
+  });
+}

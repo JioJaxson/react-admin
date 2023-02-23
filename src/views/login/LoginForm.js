@@ -7,7 +7,7 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 // antd
-import { Button, Checkbox, Form, Input, Row, Col } from "antd";
+import { Button, Checkbox, Form, Input, Row, Col, message } from "antd";
 // scss
 import "./index.scss";
 // svg
@@ -18,22 +18,63 @@ import qq_icon from "../../static/imgs/qq_icon.svg";
 // validate
 import { validate_password } from "../../utils/validate";
 // API
-import { LoginAPI } from "../../api/account";
+import { LoginAPI, GetCodeAPI } from "../../api/account";
 
 class LoginForm extends Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      username: "",
+      code_button_loading: false,
+      code_button_disabled: false,
+      code_button_text: "获取验证码",
+    };
   }
+  // 登陆
   onFinish = (values) => {
     LoginAPI()
-      .then((response ) => {
-        console.log(response );
+      .then((response) => {
+        console.log(response);
       })
       .catch((err) => {
         console.log(err);
       });
     console.log("Received values of form: ", values);
+  };
+  // 获取验证码
+  getCodeFn = () => {
+    if (!this.state.username) {
+      message.warning("用户名不能为空!", 1);
+      return false;
+    }
+    const requestData = {
+      username: this.state.username,
+      module: "login",
+    };
+    this.setState({
+      code_button_loading: true,
+      code_button_text: "发送中",
+    });
+    GetCodeAPI(requestData)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        this.setState({
+          code_button_loading: false,
+          code_button_text: "重新获取",
+        });
+      });
+    console.log(88888);
+  };
+
+  /** input输入处理 */
+  inputChange = (e) => {
+    let value = e.target.value;
+    console.log(value);
+    this.setState({
+      username: value,
+    });
   };
   toggleForm = () => {
     // 调父级的方法
@@ -41,6 +82,13 @@ class LoginForm extends Component {
   };
 
   render() {
+    const {
+      username,
+      code_button_loading,
+      code_button_disabled,
+      code_button_text,
+    } = this.state;
+
     return (
       <div className="body">
         <div className="form_wrap c_white">
@@ -78,6 +126,8 @@ class LoginForm extends Component {
               ]}
             >
               <Input
+                value={username}
+                onChange={this.inputChange}
                 prefix={<UserOutlined />}
                 placeholder="用户邮箱"
                 size="large"
@@ -122,8 +172,15 @@ class LoginForm extends Component {
                   />
                 </Col>
                 <Col span={9}>
-                  <Button type="primary" size="large" block>
-                    获取验证码
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    onClick={this.getCodeFn}
+                    disabled={code_button_disabled}
+                    loading={code_button_loading}
+                  >
+                    {code_button_text}
                   </Button>
                 </Col>
               </Row>
