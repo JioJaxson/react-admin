@@ -15,7 +15,10 @@ import github_icon from "../../static/imgs/github_icon.svg";
 import weixin_icon from "../../static/imgs/weixin_icon.svg";
 import bilibili_icon from "../../static/imgs/bilibili_icon.svg";
 import qq_icon from "../../static/imgs/qq_icon.svg";
-// 组件
+// validate
+import { validate_password } from "../../utils/validate";
+// API
+import { LoginAPI } from "../../api/account";
 
 class LoginForm extends Component {
   constructor() {
@@ -23,6 +26,13 @@ class LoginForm extends Component {
     this.state = {};
   }
   onFinish = (values) => {
+    LoginAPI()
+      .then((response ) => {
+        console.log(response );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     console.log("Received values of form: ", values);
   };
   toggleForm = () => {
@@ -52,7 +62,7 @@ class LoginForm extends Component {
             initialValues={{
               remember: true,
             }}
-            onFinish={() => this.onFinish}
+            onFinish={this.onFinish}
           >
             <Form.Item
               name="username"
@@ -60,6 +70,10 @@ class LoginForm extends Component {
                 {
                   required: true,
                   message: "请输入用户名!",
+                },
+                {
+                  type: "email",
+                  message: "邮箱格式不正确!",
                 },
               ]}
             >
@@ -76,6 +90,10 @@ class LoginForm extends Component {
                   required: true,
                   message: "请输入密码!",
                 },
+                {
+                  pattern: validate_password,
+                  message: "请输入大于6位小于20位数字+字母!",
+                },
               ]}
             >
               <Input
@@ -87,7 +105,13 @@ class LoginForm extends Component {
             </Form.Item>
             <Form.Item
               name="code"
-              rules={[{ required: true, message: "请输入验证码!" }]}
+              rules={[
+                { required: true, message: "请输入验证码!" },
+                {
+                  len: 6,
+                  message: "请输入6位数验证码!",
+                },
+              ]}
             >
               <Row gutter={15}>
                 <Col span={15}>

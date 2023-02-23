@@ -119,7 +119,7 @@ class RigisterForm extends Component {
                 </Col>
               </Row>
             </Form.Item>
-            <Form.Item className="fja_sb_c">
+            <Form.Item className="fja_sb_c" block>
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox className="c_white">记住密码</Checkbox>
               </Form.Item>
