@@ -15,6 +15,17 @@ export function LoginAPI(data) {
 }
 
 /**
+ * 注册接口
+ */
+ export function RegisterAPI(data) {
+  return service.request({
+    url: "/register/",
+    method: "POST",
+    data,
+  });
+}
+
+/**
  * 验证码接口
  */
  export function GetCodeAPI(data) {

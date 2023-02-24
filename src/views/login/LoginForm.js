@@ -7,7 +7,7 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 // antd
-import { Button, Checkbox, Form, Input, Row, Col } from "antd";
+import { Button, Checkbox, Form, Input, Row, Col, message } from "antd";
 // scss
 import "./index.scss";
 // svg
@@ -22,34 +22,70 @@ import { LoginAPI } from "../../api/account";
 // 组件
 import GetCode from "../../components/getCode/index";
 
+// 加密
+import CryptoJs from "crypto-js";
 class LoginForm extends Component {
   constructor() {
     super();
     this.state = {
-      username: "",
-      code_button_loading: false,
-      code_button_disabled: false,
-      code_button_text: "获取验证码",
+      password: "",
+      code: "",
+      module: "login",
+      loading: false,
     };
   }
   // 登陆
   onFinish = (values) => {
-    LoginAPI()
-      .then((response) => {
-        console.log(response);
+    const requestData = {
+      username: this.state.username,
+      code: this.state.code,
+      password: CryptoJs.MD5(this.state.password).toString(), // md5加密
+    };
+    this.setState({
+      loading: true,
+    });
+    LoginAPI(requestData)
+      .then((res) => {
+        console.log(res);
+        const resMsg = res.data.message;
+        const resCode = res.data.resCode;
+        if (resCode === 0) {
+          message.success(resMsg);
+        } else {
+          message.error(resMsg)
+        }
+        this.setState({
+          loading: false,
+        });
       })
       .catch((err) => {
         console.log(err);
+        const errMsg = err.data.message;
+        message.error(errMsg);
+        this.setState({
+          loading: false,
+        });
       });
     console.log("Received values of form: ", values);
   };
 
   /** input输入处理 */
-  inputChange = (e) => {
+  inputChangeUsername = (e) => {
     let value = e.target.value;
-    console.log(value);
     this.setState({
       username: value,
+    });
+  };
+  inputChangePassword = (e) => {
+    let value = e.target.value;
+    this.setState({
+      password: value,
+    });
+  };
+  inputChangeCode = (e) => {
+    let value = e.target.value;
+    this.setState({
+      code: value,
     });
   };
 
@@ -59,7 +95,7 @@ class LoginForm extends Component {
   };
 
   render() {
-    const { username } = this.state;
+    const { username, module, loading } = this.state;
 
     return (
       <div className="body">
@@ -99,7 +135,7 @@ class LoginForm extends Component {
             >
               <Input
                 value={username}
-                onChange={this.inputChange}
+                onChange={this.inputChangeUsername}
                 prefix={<UserOutlined />}
                 placeholder="用户邮箱"
                 size="large"
@@ -118,10 +154,11 @@ class LoginForm extends Component {
                 },
               ]}
             >
-              <Input
+              <Input.Password
                 prefix={<LockOutlined />}
                 type="password"
                 placeholder="密码"
+                onChange={this.inputChangePassword}
                 size="large"
               />
             </Form.Item>
@@ -140,11 +177,12 @@ class LoginForm extends Component {
                   <Input
                     prefix={<MailOutlined />}
                     placeholder="验证码"
+                    onChange={this.inputChangeCode}
                     size="large"
                   />
                 </Col>
                 <Col span={9}>
-                  <GetCode username={username} />
+                  <GetCode username={username} module={module} />
                 </Col>
               </Row>
             </Form.Item>
@@ -162,7 +200,8 @@ class LoginForm extends Component {
               <Button
                 type="primary"
                 htmlType="submit"
-                className="button_w_100"
+                block
+                loading={loading}
                 size="large"
               >
                 登陆

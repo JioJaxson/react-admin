@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 // API
 import { GetCodeAPI } from "../../api/account";
+// scss
+import "./index.scss";
 // antd
 import { Button, message } from "antd";
 // 验证
@@ -16,6 +18,7 @@ class GetCode extends Component {
       button_text: "获取验证码",
       button_loading: false,
       button_disabled: false,
+      module: props.module,
     };
   }
   // this.props.username 每次都会去获取
@@ -47,18 +50,23 @@ class GetCode extends Component {
     });
     const requestData = {
       username,
-      module: "login",
+      module: this.state.module,
     };
     GetCodeAPI(requestData)
-      .then((response) => {
+      .then((res) => {
+        console.log(res);
+        const resMsg = res.data.message;
+        message.success(resMsg);
         // 执行倒计时
         this.countDown();
       })
-      .catch((error) => {
+      .catch((err) => {
+        console.log(err);
         this.setState({
           button_loading: false,
           button_text: "重新获取",
         });
+      
       });
   };
   /**
@@ -71,10 +79,13 @@ class GetCode extends Component {
     this.setState({
       button_loading: false,
       button_disabled: true,
-      button_text: `${sec}S`,
+      button_text: `倒计时${sec}秒`,
     });
     timer = setInterval(() => {
       sec--;
+      this.setState({
+        button_text: `倒计时${sec}秒`,
+      });
       if (sec <= 0) {
         this.setState({
           button_text: `重新获取`,
@@ -83,9 +94,6 @@ class GetCode extends Component {
         clearInterval(timer);
         return false;
       }
-      this.setState({
-        button_text: `${sec}S`,
-      });
     }, 1000);
   };
 
@@ -98,6 +106,7 @@ class GetCode extends Component {
         block
         size="large"
         onClick={this.getCodeFn}
+        className="code_button"
       >
         {this.state.button_text}
       </Button>

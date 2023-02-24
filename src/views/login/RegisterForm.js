@@ -7,7 +7,7 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 // antd
-import { Button, Checkbox, Form, Input, Row, Col } from "antd";
+import { Button, Checkbox, Form, Input, Row, Col, message } from "antd";
 // scss
 import "./index.scss";
 // svg
@@ -15,25 +15,66 @@ import github_icon from "../../static/imgs/github_icon.svg";
 import weixin_icon from "../../static/imgs/weixin_icon.svg";
 import bilibili_icon from "../../static/imgs/bilibili_icon.svg";
 import qq_icon from "../../static/imgs/qq_icon.svg";
+// validate
+import { validate_pass } from "../../utils/validate";
 // 组件
 import GetCode from "../../components/getCode/index";
-
+// 加密
+import CryptoJs from "crypto-js";
+// API
+import { RegisterAPI } from "../../api/account";
 class RegisterForm extends Component {
   constructor() {
     super();
     this.state = {
       username: "",
+      password: "",
+      code: "",
+      module: "register",
     };
   }
   onFinish = (values) => {
-    console.log("Received values of form: ", values);
+    const requestData = {
+      username: this.state.username,
+      password: CryptoJs.MD5(this.state.password).toString(),
+      code: this.state.code,
+    };
+    console.log(requestData);
+    RegisterAPI(requestData)
+      .then((res) => {
+        console.log(res);
+        const resMsg = res.data.message;
+        const resCode = res.data.resCode;
+        if (resCode === 0) {
+          message.success(resMsg);
+          this.toggleForm();
+        } else {
+          message.error(resMsg);
+        }
+      })
+      .catch((err) => {
+        const errMsg = err.data.message;
+        message.error(errMsg);
+        console.log(err);
+      });
   };
   /** input输入处理 */
-  inputChange = (e) => {
+  inputChangeUsername = (e) => {
     let value = e.target.value;
-    console.log(value);
     this.setState({
       username: value,
+    });
+  };
+  inputChangePassword = (e) => {
+    let value = e.target.value;
+    this.setState({
+      password: value,
+    });
+  };
+  inputChangeCode = (e) => {
+    let value = e.target.value;
+    this.setState({
+      code: value,
     });
   };
 
@@ -43,7 +84,7 @@ class RegisterForm extends Component {
   };
 
   render() {
-    const { username } = this.state;
+    const { username, module } = this.state;
     return (
       <div className="body">
         <div className="form_wrap c_white">
@@ -82,7 +123,7 @@ class RegisterForm extends Component {
             >
               <Input
                 prefix={<UserOutlined />}
-                onChange={this.inputChange}
+                onChange={this.inputChangeUsername}
                 placeholder="用户邮箱"
                 size="large"
               />
@@ -90,29 +131,43 @@ class RegisterForm extends Component {
             <Form.Item
               name="password"
               rules={[
-                {
-                  required: true,
-                  message: "请输入密码!",
-                },
+                ({ getFieldValue }) => ({
+                  validator(role, value) {
+                    let passwords_value = getFieldValue("passwords"); // 获取再次输入密码的值
+                    if (!validate_pass(value)) {
+                      return Promise.reject("请输入大于6位小于20位数字+字母");
+                    }
+                    if (passwords_value && value !== passwords_value) {
+                      return Promise.reject("两次密码不一致");
+                    }
+                    return Promise.resolve();
+                  },
+                }),
               ]}
             >
-              <Input
+              <Input.Password
                 prefix={<LockOutlined />}
                 type="password"
                 placeholder="密码"
+                onChange={this.inputChangePassword}
                 size="large"
               />
             </Form.Item>
             <Form.Item
-              name="rePassword"
+              name="passwords"
               rules={[
-                {
-                  required: true,
-                  message: "请输入确认密码!",
-                },
+                { required: true, message: "再次确认密码不能为空！！" },
+                ({ getFieldValue }) => ({
+                  validator(role, value) {
+                    if (value !== getFieldValue("password")) {
+                      return Promise.reject("两次密码不一致");
+                    }
+                    return Promise.resolve();
+                  },
+                }),
               ]}
             >
-              <Input
+              <Input.Password
                 prefix={<LockOutlined />}
                 type="password"
                 placeholder="确认密码"
@@ -121,18 +176,21 @@ class RegisterForm extends Component {
             </Form.Item>
             <Form.Item
               name="code"
-              rules={[{ required: true, message: "请输入验证码!" }]}
+              rules={[
+                { required: true, message: "请输入长度为6位的字符", len: 6 },
+              ]}
             >
               <Row gutter={15}>
                 <Col span={15}>
                   <Input
                     prefix={<MailOutlined />}
-                    placeholder="验证码"
+                    placeholder="请输入验证码"
                     size="large"
+                    onChange={this.inputChangeCode}
                   />
                 </Col>
                 <Col span={9}>
-                  <GetCode username={username} />
+                  <GetCode username={username} module={module} />
                 </Col>
               </Row>
             </Form.Item>
