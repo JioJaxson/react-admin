@@ -40,3 +40,13 @@ $fs24: 24px;
 
 // button
 .button_w_100{width: 100%;}
+
+
+// 兼容性
+@mixin webkit($attr, $value) {
+    -webkit-#{$attr}: $value;
+    -moz-#{$attr}: $value;
+    -ms-#{$attr}: $value;
+    -o-#{$attr}: $value;
+    #{$attr}: $value;
+}

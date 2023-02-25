@@ -1,10 +1,12 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 // antd_icon
 import {
   LinkedinOutlined,
   LockOutlined,
   UserOutlined,
   MailOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
 // antd
 import { Button, Checkbox, Form, Input, Row, Col, message } from "antd";
@@ -21,7 +23,6 @@ import { validate_password } from "../../utils/validate";
 import { LoginAPI } from "../../api/account";
 // 组件
 import GetCode from "../../components/getCode/index";
-
 // 加密
 import CryptoJs from "crypto-js";
 class LoginForm extends Component {
@@ -51,8 +52,10 @@ class LoginForm extends Component {
         const resCode = res.data.resCode;
         if (resCode === 0) {
           message.success(resMsg);
+          // 路由跳转
+          this.props.history.push("/index");
         } else {
-          message.error(resMsg)
+          message.error(resMsg);
         }
         this.setState({
           loading: false,
@@ -96,7 +99,16 @@ class LoginForm extends Component {
 
   render() {
     const { username, module, loading } = this.state;
-
+    const suffixSelector = (
+      <Form.Item name="suffix" noStyle>
+        <Input
+          prefix={<UserAddOutlined />}
+          style={{
+            width: 40,
+          }}
+        ></Input>
+      </Form.Item>
+    );
     return (
       <div className="body">
         <div className="form_wrap c_white">
@@ -186,6 +198,7 @@ class LoginForm extends Component {
                 </Col>
               </Row>
             </Form.Item>
+
             <Form.Item className="fja_sb_c">
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox className="c_white">记住密码</Checkbox>
@@ -223,4 +236,4 @@ class LoginForm extends Component {
   }
 }
 
-export default LoginForm;
+export default withRouter(LoginForm);
